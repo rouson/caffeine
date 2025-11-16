@@ -8,7 +8,7 @@
 #define call_assert_describe(c,d)
 #endif
 
-module caf_event_test
+module prif_event_test_m
     use assert_m
     use iso_c_binding, only: &
             c_ptr, c_int64_t, c_intptr_t, c_size_t, c_null_funptr, c_f_pointer, c_loc, c_sizeof
@@ -22,21 +22,34 @@ module caf_event_test
             prif_put, &
             prif_sync_all, &
             prif_this_image_no_coarray
-    use veggies, only: result_t, test_item_t, assert_equals, describe, it, succeed
+    use julienne_m, only: test_description_t, test_diagnosis_t, test_result_t, test_t, usher, passing_test &
+      ,operator(.all.), operator(.also.), operator(.equalsExpected.), operator(//)
 
     implicit none
     private
-    public :: test_prif_event
-contains
-    function test_prif_event() result(tests)
-        type(test_item_t) :: tests
+    public :: prif_event_test_t
 
-        tests = describe( &
-            "PRIF Events", &
-            [ it("pass serial event test", check_event_serial) &
-            , it("pass parallel hot-spot event test", check_event_parallel) &
-            , it("pass parallel hot-spot notify test", check_notify) &
-            ])
+    type, extends(test_t) :: prif_event_test_t
+    contains
+      procedure, nopass, non_overridable :: subject
+      procedure, nopass, non_overridable :: results
+    end type
+
+contains
+   pure function subject()
+     character(len=:), allocatable :: subject
+     subject = "PRIF Events"
+   end function
+
+    function results() result(test_results)
+        type(test_result_t), allocatable :: test_results(:)
+        type(prif_event_test_t) prif_event_test
+
+        test_results = prif_event_test%run([ &
+           test_description_t("a serial event test", usher(check_event_serial)) &
+          ,test_description_t("a parallel hot-spot event test", usher(check_event_parallel)) &
+          ,test_description_t("a parallel hot-spot notify test", usher(check_notify)) &
+        ])
     end function
 
     function test_rand(lo, hi) result(result_)
@@ -47,8 +60,8 @@ contains
         call_assert(result_ >= lo .and. result_ <= hi)
     end function
 
-    function check_event_serial() result(result_)
-        type(result_t) :: result_
+    function check_event_serial() result(diag)
+        type(test_diagnosis_t) diag 
 
         integer :: me, num_imgs
         type(prif_event_type) :: dummy_event
@@ -58,9 +71,9 @@ contains
         type(prif_event_type), pointer :: local_event
         integer(c_intptr_t) :: base_addr
 
+        diag = passing_test()
         call RANDOM_INIT(REPEATABLE=.true., IMAGE_DISTINCT=.true.)
 
-        result_ = succeed("")
         sizeof_event = int(storage_size(dummy_event)/8, c_size_t)
         call prif_num_images(num_images=num_imgs)
         call prif_this_image_no_coarray(this_image=me)
@@ -86,7 +99,7 @@ contains
           expect = 0
           do i=1, lim
             call prif_event_query(c_loc(local_event), count)
-            result_ = result_ .and. assert_equals(expect, int(count), "top of loop")
+            diag = diag .also. (int(count) .equalsExpected. expect) // "event count at top of loop"
             call_assert(expect == int(count))
 
             do j=1,i
@@ -94,14 +107,14 @@ contains
               expect = expect + 1
 
               call prif_event_query(c_loc(local_event), count)
-              result_ = result_ .and. assert_equals(expect, int(count), "after event_post")
+              diag = diag .also. (int(count) .equalsExpected. expect) // "after event_post"
               call_assert(expect == int(count))
 
               call prif_event_post_indirect(me, base_addr)
               expect = expect + 1
 
               call prif_event_query(c_loc(local_event), count)
-              result_ = result_ .and. assert_equals(expect, int(count), "after event_post_indirect")
+              diag = diag .also. (int(count) .equalsExpected. expect) // "event count after event_post_indirect"
               call_assert(expect == int(count))
 
               if (expect >= 1) then
@@ -126,7 +139,7 @@ contains
                 expect = expect - c
 
                 call prif_event_query(c_loc(local_event), count)
-                result_ = result_ .and. assert_equals(expect, int(count), context)
+                diag = diag .also. (int(count) .equalsExpected. expect) // context
                 call_assert_describe(expect == int(count), context)
               end if
             end do
@@ -137,8 +150,8 @@ contains
     end function
 
 
-    function check_event_parallel() result(result_)
-        type(result_t) :: result_
+    function check_event_parallel() result(diag)
+        type(test_diagnosis_t) :: diag
 
         integer :: me, num_imgs
         type(prif_event_type) :: dummy_event
@@ -149,7 +162,7 @@ contains
         type(prif_event_type), pointer :: local_evt
         integer, pointer :: local_ctr(:)
 
-        result_ = succeed("")
+        diag = passing_test()
         sizeof_event = int(storage_size(dummy_event)/8, c_size_t)
         sizeof_int = c_sizeof(me)
         call prif_num_images(num_images=num_imgs)
@@ -204,9 +217,7 @@ contains
               call prif_event_wait(c_loc(local_evt), int(num_imgs,c_int64_t))
 
               ! validate ctr(:)[1] == i
-              do j=1,num_imgs
-                result_ = result_ .and. assert_equals(i, local_ctr(j), "gather result")
-              end do
+              diag = diag .also. (.all. (local_ctr(1:num_imgs) .equalsExpected. i)) // "gather result"
 
               ! image 1 writes back a coarray value to each image, then posts an event
               do j=1,num_imgs
@@ -228,7 +239,7 @@ contains
             call prif_event_wait(c_loc(local_evt))
 
             ! validate ctr(1)[me] == i
-            result_ = result_ .and. assert_equals(i, local_ctr(1), "scatter result")
+            diag = diag .also. (local_ctr(1) .equalsExpected. i) // "scatter result"
 
           end do
         end block
@@ -237,8 +248,8 @@ contains
         call prif_deallocate_coarray([coarray_handle_evt])
     end function
 
-    function check_notify() result(result_)
-        type(result_t) :: result_
+    function check_notify() result(diag)
+        type(test_diagnosis_t) diag
 
         integer :: me, num_imgs
         type(prif_notify_type) :: dummy_notify
@@ -249,7 +260,7 @@ contains
         type(prif_notify_type), pointer :: local_evt
         integer, pointer :: local_ctr(:)
 
-        result_ = succeed("")
+        diag = passing_test()
         sizeof_notify = int(storage_size(dummy_notify)/8, c_size_t)
         sizeof_int = c_sizeof(me)
         call prif_num_images(num_images=num_imgs)
@@ -303,9 +314,7 @@ contains
               call prif_notify_wait(c_loc(local_evt), int(num_imgs,c_int64_t))
 
               ! validate ctr(:)[1] == i
-              do j=1,num_imgs
-                result_ = result_ .and. assert_equals(i, local_ctr(j), "gather result")
-              end do
+              diag = diag .also. (.all. (local_ctr(1:num_imgs) .equalsExpected. i)) // "gather result"
 
               ! image 1 writes back a coarray value to each image with notify
               do j=1,num_imgs
@@ -329,7 +338,7 @@ contains
             call prif_notify_wait(c_loc(local_evt))
 
             ! validate ctr(1)[me] == i
-            result_ = result_ .and. assert_equals(i, local_ctr(1), "scatter result")
+            diag = diag .also. (local_ctr(1) .equalsExpected. i) // "scatter result"
 
           end do
         end block
@@ -338,4 +347,4 @@ contains
         call prif_deallocate_coarray([coarray_handle_evt])
     end function
 
-end module
+end module prif_event_test_m

@@ -23,8 +23,6 @@ contains
         use caf_image_index_test, only: &
                 caf_image_index_prif_image_index => &
                     test_prif_image_index
-        use caf_event_test, only: &
-                    test_prif_event
         use caf_atomic_test, only: &
                     test_prif_atomic
         use caf_teams_test, only: &
@@ -68,7 +66,6 @@ contains
         individual_tests = [individual_tests, caf_image_index_prif_image_index()]
         individual_tests = [individual_tests, caf_teams_caf_teams()]
         individual_tests = [individual_tests, test_prif_atomic()]
-        individual_tests = [individual_tests, test_prif_event()]
         individual_tests = [individual_tests, test_prif_stop()]
         individual_tests = [individual_tests, test_prif_error_stop()]
 
