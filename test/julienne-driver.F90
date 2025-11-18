@@ -17,6 +17,7 @@ program test_suite_driver
   use prif_rma_test_m, only : prif_rma_test_t
   use prif_strided_test_m, only : prif_strided_test_t
   use prif_sync_images_test_m, only : prif_sync_images_test_t
+  use prif_teams_test_m, only : prif_teams_test_t
   use prif_this_image_no_coarray_test_m, only : prif_this_image_no_coarray_test_t
   implicit none
 
@@ -36,6 +37,8 @@ program test_suite_driver
     ,test_fixture_t( prif_rma_test_t() ) &
     ,test_fixture_t( prif_strided_test_t() ) &
     ,test_fixture_t( prif_sync_images_test_t() ) &
+    ,test_fixture_t( prif_teams_test_t() ) &
+    ,test_fixture_t( prif_this_image_no_coarray_test_t() ) &
   ]))
     call test_harness%report_results
   end associate

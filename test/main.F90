@@ -25,9 +25,6 @@ contains
                     test_prif_image_index
         use caf_atomic_test, only: &
                     test_prif_atomic
-        use caf_teams_test, only: &
-                caf_teams_caf_teams => &
-                    test_caf_teams
         use caf_stop_test, only: test_prif_stop
         use caf_error_stop_test, only: test_prif_error_stop
         use veggies, only: test_item_t, test_that, run_tests, result_t
@@ -64,7 +61,6 @@ contains
 #endif
         individual_tests = [a00_caffeinate_caffeinate()]
         individual_tests = [individual_tests, caf_image_index_prif_image_index()]
-        individual_tests = [individual_tests, caf_teams_caf_teams()]
         individual_tests = [individual_tests, test_prif_atomic()]
         individual_tests = [individual_tests, test_prif_stop()]
         individual_tests = [individual_tests, test_prif_error_stop()]
