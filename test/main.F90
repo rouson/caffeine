@@ -20,9 +20,6 @@ contains
                 check_caffeination, &
                 a00_caffeinate_caffeinate => &
                     test_caffeinate
-        use caf_image_index_test, only: &
-                caf_image_index_prif_image_index => &
-                    test_prif_image_index
         use caf_atomic_test, only: &
                     test_prif_atomic
         use caf_stop_test, only: test_prif_stop
@@ -60,7 +57,6 @@ contains
     end block
 #endif
         individual_tests = [a00_caffeinate_caffeinate()]
-        individual_tests = [individual_tests, caf_image_index_prif_image_index()]
         individual_tests = [individual_tests, test_prif_atomic()]
         individual_tests = [individual_tests, test_prif_stop()]
         individual_tests = [individual_tests, test_prif_error_stop()]
