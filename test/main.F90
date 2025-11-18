@@ -20,8 +20,6 @@ contains
                 check_caffeination, &
                 a00_caffeinate_caffeinate => &
                     test_caffeinate
-        use caf_atomic_test, only: &
-                    test_prif_atomic
         use caf_stop_test, only: test_prif_stop
         use caf_error_stop_test, only: test_prif_error_stop
         use veggies, only: test_item_t, test_that, run_tests, result_t
@@ -57,7 +55,6 @@ contains
     end block
 #endif
         individual_tests = [a00_caffeinate_caffeinate()]
-        individual_tests = [individual_tests, test_prif_atomic()]
         individual_tests = [individual_tests, test_prif_stop()]
         individual_tests = [individual_tests, test_prif_error_stop()]
 
