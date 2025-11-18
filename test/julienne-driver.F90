@@ -18,6 +18,7 @@ program test_suite_driver
   use prif_image_queries_test_m, only : prif_image_queries_test_t
   use prif_num_images_test_m, only : prif_num_images_test_t
   use prif_rma_test_m, only : prif_rma_test_t
+  use prif_stop_test_m, only : prif_stop_test_t
   use prif_strided_test_m, only : prif_strided_test_t
   use prif_sync_images_test_m, only : prif_sync_images_test_t
   use prif_teams_test_m, only : prif_teams_test_t
@@ -41,6 +42,7 @@ program test_suite_driver
     ,test_fixture_t( prif_image_queries_test_t() ) &
     ,test_fixture_t( prif_num_images_test_t() ) &
     ,test_fixture_t( prif_rma_test_t() ) &
+    ,test_fixture_t( prif_stop_test_t() ) &
     ,test_fixture_t( prif_strided_test_t() ) &
     ,test_fixture_t( prif_sync_images_test_t() ) &
     ,test_fixture_t( prif_teams_test_t() ) &
