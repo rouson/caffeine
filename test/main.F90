@@ -26,9 +26,6 @@ contains
         use caf_image_index_test, only: &
                 caf_image_index_prif_image_index => &
                     test_prif_image_index
-        use caf_rma_test, only: &
-                caf_rma_prif_rma => &
-                    test_prif_rma
         use caf_strided_test, only: &
                     test_prif_rma_strided
         use caf_event_test, only: &
@@ -75,7 +72,6 @@ contains
         individual_tests = [a00_caffeinate_caffeinate()]
         individual_tests = [individual_tests, caf_allocate_prif_allocate()]
         individual_tests = [individual_tests, caf_image_index_prif_image_index()]
-        individual_tests = [individual_tests, caf_rma_prif_rma()]
         individual_tests = [individual_tests, test_prif_rma_strided()]
         individual_tests = [individual_tests, caf_teams_caf_teams()]
         individual_tests = [individual_tests, test_prif_atomic()]

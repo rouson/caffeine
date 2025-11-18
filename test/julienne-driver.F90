@@ -12,6 +12,7 @@ program test_suite_driver
   use prif_co_sum_test_m, only : prif_co_sum_test_t
   use prif_image_queries_test_m, only : prif_image_queries_test_t
   use prif_num_images_test_m, only : prif_num_images_test_t
+  use prif_rma_test_m, only : prif_rma_test_t
   use prif_sync_images_test_m, only : prif_sync_images_test_t
   use prif_this_image_no_coarray_test_m, only : prif_this_image_no_coarray_test_t
   implicit none
@@ -26,7 +27,10 @@ program test_suite_driver
     ,test_fixture_t( prif_co_max_test_t() ) &
     ,test_fixture_t( prif_co_min_test_t() ) &
     ,test_fixture_t( prif_co_reduce_test_t() ) &
-    ,test_fixture_t( prif_coarray_inquiry_test_t() ) &
+    ,test_fixture_t( prif_co_sum_test_t() ) &
+    ,test_fixture_t( prif_image_queries_test_t() ) &
+    ,test_fixture_t( prif_num_images_test_t() ) &
+    ,test_fixture_t( prif_rma_test_t() ) &
     ,test_fixture_t( prif_sync_images_test_t() ) &
   ]))
     call test_harness%report_results
